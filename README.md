@@ -1,2 +1,1 @@
-# board-basic-dropzone
-dropzone.js 적용된 기본 게시판
+# dropzone.js 적용된 기본 게시판
