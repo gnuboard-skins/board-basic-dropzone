@@ -1,11 +1,10 @@
 <?php
 include_once('../../../../../common.php');
 
-$wr_id = -1;
-if($sca) {
-    foreach(explode('|',$board['bo_category_list']) as $idx=>$ca) {
-        if($sca==$ca) $wr_id = $idx;
-    }
+if(!$wr_id) {
+    header("Content-Type: application/json");
+    echo json_encode(['success'=>false]);
+    exit;
 }
 $bf_no = $_GET['bf_no'];
 

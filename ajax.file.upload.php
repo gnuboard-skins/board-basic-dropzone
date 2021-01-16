@@ -1,18 +1,30 @@
-<?php
-include_once('../../../../../common.php');
+<?php include_once('../../../../../common.php');
 
-// 디렉토리가 생성
-@mkdir(G5_DATA_PATH.'/file/'.$bo_table, G5_DIR_PERMISSION);
-@chmod(G5_DATA_PATH.'/file/'.$bo_table, G5_DIR_PERMISSION);
-
-$wr_id = -1;
-if($sca) {
-    foreach(explode('|',$board['bo_category_list']) as $idx=>$ca) {
-        if($sca==$ca) $wr_id = $idx;
-    }
+if(!$member['mb_no']) {
+    header("Content-Type: application/json");
+    echo json_encode([
+        'success'=>false,
+        'bf_no'=>0,
+        'image'=>false,
+        'path'=> '',
+        'msg'=> '파일업로드를 위해서는 로그인이 필요합니다.'
+    ]);
+    exit;
 }
 
-$chars_array = array_merge(range(0,9), range('a','z'), range('A','Z'));
+// 디렉토리가 생성
+@chmod(G5_DATA_PATH.'/file/'.$bo_table, G5_DIR_PERMISSION);
+
+$bf_download = 0;
+if(!$wr_id) {
+    $wr_id = -1;
+    $bf_download = $member['mb_no'];
+}
+$chars_array = array_merge(
+    range(0,9),
+    range('a','z'),
+    range('A','Z')
+);
 
 $upload = [
     'file'  => '',
@@ -100,7 +112,7 @@ if (is_uploaded_file($tmp_file)) {
                  bf_fileurl = '{$upload['fileurl']}',
                  bf_thumburl = '{$upload['thumburl']}',
                  bf_storage = '{$upload['storage']}',
-                 bf_download = 0,
+                 bf_download = '{$bf_download}',
                  bf_filesize = '".(int)$upload['filesize']."',
                  bf_width = '".(int)$upload['image'][0]."',
                  bf_height = '".(int)$upload['image'][1]."',

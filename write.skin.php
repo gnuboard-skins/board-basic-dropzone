@@ -5,6 +5,9 @@ add_javascript('<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7
 add_stylesheet('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.2/dropzone.min.css" integrity="sha512-3g+prZHHfmnvE1HBLwUnVuunaPOob7dpksI7/v6UnF/rnKGwHf/GdEq9K7iEN7qTtW+S0iivTcGpeTBqqB04wA==" crossorigin="anonymous" />', 0);
 // add_stylesheet('css 구문', 출력순서); 숫자가 작을 수록 먼저 출력됨
 add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0);
+
+
+$upload_count = $board['bo_upload_count'];
 ?>
 
 <section id="bo_w">
@@ -137,6 +140,7 @@ add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0
     <?php } ?>
 
     <div id="myDropzone" class="dropzone"></div>
+    <p>※ 파일을 클릭하시면 에디터에 삽입됩니다.</p>
 
     <?php if ($is_use_captcha) { //자동등록방지  ?>
     <div class="write_div">
@@ -240,8 +244,9 @@ add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0
             dictDefaultMessage: "<strong>여기에 파일을 놓거나 클릭하세요.</strong>",
             dictCancelUpload: "업로드 취소",
             dictRemoveFile: "<a href='#'>파일삭제</a>",
-            url: "<?php echo "{$board_skin_url}/ajax.file.upload.php?bo_table={$bo_table}&sca={$sca}"?>",
+            url: "<?php echo "{$board_skin_url}/ajax.file.upload.php?bo_table={$bo_table}&sca={$sca}&wr_id={$wr_id}"?>",
             addRemoveLinks: true,
+            maxFiles: <?php echo $upload_count?>,
             success: function (file, res) {
                 $(file.previewElement).attr("data-bf_no", res['bf_no']);
                 $(file.previewElement).find(".dz-details").click(function(){
@@ -260,7 +265,7 @@ add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0
 
                 $.ajax({
                     method:"post",
-                    url: "<?php echo "{$board_skin_url}/ajax.file.list.php?bo_table={$bo_table}&sca={$sca}"?>",
+                    url: "<?php echo "{$board_skin_url}/ajax.file.list.php?bo_table={$bo_table}&sca={$sca}&wr_id={$wr_id}"?>",
                     success: function(data){
                         if(data['count']>0) {
                             data['list'].forEach(function(el){
@@ -287,16 +292,18 @@ add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0
             },
             removedfile: function (file) {
                 const bf_no = $(file.previewElement).data("bf_no");
-                $.ajax({
-                    method:"post",
-                    url: "<?php echo "{$board_skin_url}/ajax.file.delete.php?bo_table={$bo_table}&sca={$sca}"?>&bf_no="+bf_no,
-                    success: function(data){
-                        if(data['success']) {
-                            alert("파일삭제성공");
-                            $(file.previewElement).remove();
+                if(confirm("파일을 삭제하면 복구가 불가능합니다.\n정말로 파일을 삭제하시겠습니까?\n")) {
+                    $.ajax({
+                        method:"post",
+                        url: "<?php echo "{$board_skin_url}/ajax.file.delete.php?bo_table={$bo_table}&sca={$sca}&wr_id={$wr_id}"?>&bf_no="+bf_no,
+                        success: function(data){
+                            if(data['success']) {
+                                alert("파일삭제성공");
+                                $(file.previewElement).remove();
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
     });
