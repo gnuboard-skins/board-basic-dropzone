@@ -2,9 +2,7 @@
 include_once('../../../../../common.php');
 
 if(!$wr_id) {
-    header("Content-Type: application/json");
-    echo json_encode(['success'=>false]);
-    exit;
+    $wr_id = -1;
 }
 $bf_no = $_GET['bf_no'];
 
