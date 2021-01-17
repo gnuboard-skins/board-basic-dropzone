@@ -6,7 +6,6 @@ add_stylesheet('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/l
 // add_stylesheet('css 구문', 출력순서); 숫자가 작을 수록 먼저 출력됨
 add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0);
 
-
 $upload_count = $board['bo_upload_count'];
 ?>
 
@@ -104,7 +103,6 @@ $upload_count = $board['bo_upload_count'];
             <input type="text" name="wr_subject" value="<?php echo $subject ?>" id="wr_subject" required class="frm_input full_input required" size="50" maxlength="255" placeholder="제목">
             <?php if ($is_member) { // 임시 저장된 글 기능 ?>
             <script src="<?php echo G5_JS_URL; ?>/autosave.js"></script>
-            <?php if($editor_content_js) echo $editor_content_js; ?>
             <button type="button" id="btn_autosave" class="btn_frmline">임시 저장된 글 (<span id="autosave_count"><?php echo $autosave_count; ?></span>)</button>
             <div id="autosave_pop">
                 <strong>임시 저장된 글 목록</strong>
@@ -118,12 +116,79 @@ $upload_count = $board['bo_upload_count'];
 
     <div class="write_div">
         <label for="wr_content" class="sound_only">내용<strong>필수</strong></label>
-        <div class="wr_content <?php echo $is_dhtml_editor ? $config['cf_editor'] : ''; ?>">
+        <div class="wr_content">
             <?php if($write_min || $write_max) { ?>
             <!-- 최소/최대 글자 수 사용 시 -->
             <p id="char_count_desc">이 게시판은 최소 <strong><?php echo $write_min; ?></strong>글자 이상, 최대 <strong><?php echo $write_max; ?></strong>글자 이하까지 글을 쓰실 수 있습니다.</p>
             <?php } ?>
-            <?php echo $editor_html; // 에디터 사용시는 에디터로, 아니면 textarea 로 노출 ?>
+
+
+            <?php if($is_dhtml_editor) {?>
+                <textarea id="wr_content" name="wr_content" class="editor"><?php echo $write['wr_content']?></textarea>
+                <style>.ck-editor__editable_inline {min-height: 500px;}</style>
+                <script src="<?php echo $board_skin_url?>/ckeditor5/build/ckeditor.js"></script>
+                <script>ClassicEditor
+                        .create( document.querySelector( '.editor' ), {
+                            mediaEmbed: { previewsInData: true, removeProviders: ["instagram", "twitter", "googleMaps", "flickr", "facebook"] },
+                            toolbar: {
+                                items: [
+                                    'heading',
+                                    '|',
+                                    'undo',
+                                    'redo',
+                                    '|',
+                                    'bold',
+                                    'italic',
+                                    'fontFamily',
+                                    'fontSize',
+                                    'fontColor',
+                                    'fontBackgroundColor',
+                                    'underline',
+                                    '|',
+                                    'alignment',
+                                    'bulletedList',
+                                    'numberedList',
+                                    '|',
+                                    'indent',
+                                    'outdent',
+                                    '|',
+                                    'link',
+                                    'blockQuote',
+                                    'insertTable',
+                                    'mediaEmbed',
+                                    'codeBlock'
+                                ]
+                            },
+                            language: 'ko',
+                            table: {
+                                contentToolbar: [
+                                    'tableColumn',
+                                    'tableRow',
+                                    'mergeTableCells',
+                                    'tableCellProperties',
+                                    'tableProperties'
+                                ]
+                            },
+                            licenseKey: '',
+
+                        } )
+                        .then( editor => {
+                            window.editor = editor;
+                        } )
+                        .catch( error => {
+                            console.error( 'Oops, something went wrong!' );
+                            console.error( 'Please, report the following error on https://github.com/ckeditor/ckeditor5/issues with the build id and the error stack trace:' );
+                            console.warn( 'Build id: in6rui54yl2g-h5r1i12144i4' );
+                            console.error( error );
+                        } );
+                function get_editor_wr_content() {
+                    return editor.getData();
+                }
+                </script>
+            <?php } else {?>
+                <textarea id="wr_content" name="wr_content" style="width:100%; height:300px"><?php echo $write['wr_content']?></textarea>
+            <?php }?>
+
             <?php if($write_min || $write_max) { ?>
             <!-- 최소/최대 글자 수 사용 시 -->
             <div id="char_count_wrap"><span id="char_count"></span>글자</div>
@@ -184,7 +249,8 @@ $upload_count = $board['bo_upload_count'];
 
     function fwrite_submit(f)
     {
-        <?php echo $editor_js; // 에디터 사용시 자바스크립트에서 내용을 폼필드로 넣어주며 내용이 입력되었는지 검사함   ?>
+        <?php //echo $editor_js; // 에디터 사용시 자바스크립트에서 내용을 폼필드로 넣어주며 내용이 입력되었는지 검사함   ?>
+        $("[name='wr_content']").val(editor.getData());
 
         var subject = "";
         var content = "";
