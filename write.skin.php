@@ -316,12 +316,18 @@ $upload_count = $board['bo_upload_count'];
             success: function (file, res) {
                 $(file.previewElement).attr("data-bf_no", res['bf_no']);
                 $(file.previewElement).find(".dz-details").click(function(){
-                    if(res['image']) {
-                        oEditors.getById['wr_content'].exec("PASTE_HTML", [`<img src="${res['path']}" alt="${file['name']}"/>`]);
-                        //editor_instance.insertHtml(`<img src="${res['path']}" alt="${file['name']}"/>`);
-                    } else {
-                        oEditors.getById['wr_content'].exec("PASTE_HTML", [`<a href="${res['path']}" target="_blank">${file['name']}</a>`]);
-                        //editor_instance.insertHtml(`<a href="${res['path']}" target="_blank">${file['name']}</a>`);
+                    if(typeof editor !== "undefined"){
+                        if(res['image']) {
+                            const content = `<p><img src="${res['path']}" alt="${file['name']}"/></p>`;
+                            const viewFragment = editor.data.processor.toView( content );
+                            const modelFragment = editor.data.toModel( viewFragment );
+                            editor.model.insertContent( modelFragment );
+                        } else {
+                            const content = `<p><a href="${res['path']}" target="_blank">${file['name']}</a></p>`;
+                            const viewFragment = editor.data.processor.toView( content );
+                            const modelFragment = editor.data.toModel( viewFragment );
+                            editor.model.insertContent( modelFragment );
+                        }
                     }
                 });
             },
